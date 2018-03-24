@@ -12,19 +12,18 @@ def check_format(link):
 			return True
 	return False
 
-def find(link, domain):
+def find(domain):
 	links = set()
-	find_links(link, domain, links)
+	find_links(domain, domain, links)
 	return links
 
 def find_links(link, domain, links):
 	page = requests.get(link)
-	print (link)
 	links.add(link)
 	try:
 		page.raise_for_status()
 	except:
-		return
+		return links
 	soup = BeautifulSoup(page.text, "lxml")
 	elements = soup.findAll('a')
 	
@@ -52,7 +51,6 @@ def find_links(link, domain, links):
 
 		else :
 			links.add(my_link)
-			print (my_link)
 
 
 
@@ -78,14 +76,16 @@ def main():
 		formats = keys['FORMATS']
 	filename = sys.argv[1]
 	file_object = open(filename, "r")
+	file_write  = open(sys.argv[2], 'w')
 	for line in file_object:
 		link = "https://www.cse.iitd.ac.in/~"+line[:-1]
-		for web_link in find(link, link):
-			print (web_link)
+		for web_link in find(link):
+			print ("[@] "+web_link)
 			threat = find_threats(web_link, key)
 			if (threat!= "No threat"):
-				threats[web_link] = threat
-	print (threats)
+				file_write.write('[*] {} : {} : {}'.format(link, web_link, threat))
+	file_object.close()
+	file_write.close()
 	
 
 if __name__=='__main__':
